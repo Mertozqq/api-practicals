@@ -1,0 +1,204 @@
+openapi: 3.0.3
+info:
+  title: Телефонный справочник API
+  version: 1.0.0
+  description: |
+    Практические 5–6. REST API для управления контактами.
+    Основной сервер сохраняет данные; Prism возвращает примеры из контракта.
+    Для телефона допустимы цифры, пробелы, скобки, точка, дефис и начальный плюс.
+    Нужно указать хотя бы один номер. PATCH заменяет переданный объект telephone целиком.
+    Учебное приложение без авторизации: используйте вымышленные данные.
+servers:
+  - url: http://localhost:3000
+    description: Основной сервер
+  - url: http://127.0.0.1:4010
+    description: Prism mock
+tags:
+  - name: Contacts
+    description: Создание, чтение, изменение и удаление контактов
+paths:
+  /api/contacts:
+    get:
+      tags: [Contacts]
+      operationId: listContacts
+      summary: Получить все контакты
+      responses:
+        '200':
+          description: Список контактов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Contact'
+              example:
+                - id: 13abea3c-8ed9-4db7-9195-ec5435194061
+                  username: Анна Иванова
+                  email: anna@example.com
+                  telephone: {mobile: '+7 900 123-45-67', home: ''}
+                  createdAt: '2026-09-27T09:00:00.000Z'
+        '500': {$ref: '#/components/responses/InternalError'}
+    post:
+      tags: [Contacts]
+      operationId: createContact
+      summary: Создать контакт
+      requestBody: {$ref: '#/components/requestBodies/ContactInput'}
+      responses:
+        '201':
+          description: Контакт создан
+          headers:
+            Location:
+              description: URL созданного контакта
+              schema: {type: string}
+              example: /api/contacts/13abea3c-8ed9-4db7-9195-ec5435194061
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Contact'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '413': {$ref: '#/components/responses/TooLarge'}
+        '500': {$ref: '#/components/responses/InternalError'}
+  /api/contacts/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Уникальный идентификатор контакта
+        schema: {type: string, minLength: 1, maxLength: 100}
+        example: 13abea3c-8ed9-4db7-9195-ec5435194061
+    get:
+      tags: [Contacts]
+      operationId: getContact
+      summary: Получить контакт по ID
+      responses:
+        '200': {$ref: '#/components/responses/Contact'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '500': {$ref: '#/components/responses/InternalError'}
+    put:
+      tags: [Contacts]
+      operationId: replaceContact
+      summary: Полностью обновить контакт
+      requestBody: {$ref: '#/components/requestBodies/ContactInput'}
+      responses:
+        '200': {$ref: '#/components/responses/Contact'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '413': {$ref: '#/components/responses/TooLarge'}
+        '500': {$ref: '#/components/responses/InternalError'}
+    patch:
+      tags: [Contacts]
+      operationId: patchContact
+      summary: Частично обновить контакт
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ContactPatch'}
+            example: {username: Анна Петрова}
+      responses:
+        '200': {$ref: '#/components/responses/Contact'}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '413': {$ref: '#/components/responses/TooLarge'}
+        '500': {$ref: '#/components/responses/InternalError'}
+    delete:
+      tags: [Contacts]
+      operationId: deleteContact
+      summary: Удалить контакт
+      responses:
+        '204': {description: Контакт удалён; тело ответа отсутствует}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '500': {$ref: '#/components/responses/InternalError'}
+components:
+  schemas:
+    Telephone:
+      type: object
+      additionalProperties: false
+      properties:
+        mobile: {type: string, maxLength: 40, pattern: '^(\+?[0-9() .-]{3,40})?$', example: '+7 900 123-45-67'}
+        home: {type: string, maxLength: 40, pattern: '^(\+?[0-9() .-]{3,40})?$', example: ''}
+      anyOf:
+        - required: [mobile]
+          properties:
+            mobile: {minLength: 3, pattern: '\S'}
+        - required: [home]
+          properties:
+            home: {minLength: 3, pattern: '\S'}
+    ContactInput:
+      type: object
+      additionalProperties: false
+      required: [username, telephone]
+      properties:
+        username: {type: string, minLength: 1, maxLength: 120, pattern: '\S', example: Анна Иванова}
+        email: {type: string, maxLength: 254, pattern: '^$|^[^\s@]+@[^\s@]+\.[^\s@]+$', default: '', example: anna@example.com}
+        telephone: {$ref: '#/components/schemas/Telephone'}
+    ContactPatch:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        username: {type: string, minLength: 1, maxLength: 120, pattern: '\S'}
+        email: {type: string, maxLength: 254, pattern: '^$|^[^\s@]+@[^\s@]+\.[^\s@]+$'}
+        telephone: {$ref: '#/components/schemas/Telephone'}
+    Contact:
+      type: object
+      additionalProperties: false
+      required: [id, username, email, telephone, createdAt]
+      example:
+        id: 13abea3c-8ed9-4db7-9195-ec5435194061
+        username: Анна Иванова
+        email: anna@example.com
+        telephone: {mobile: '+7 900 123-45-67', home: ''}
+        createdAt: '2026-09-27T09:00:00.000Z'
+      properties:
+        id: {type: string, format: uuid, example: 13abea3c-8ed9-4db7-9195-ec5435194061}
+        username: {type: string, example: Анна Иванова}
+        email: {type: string, example: anna@example.com}
+        telephone: {$ref: '#/components/schemas/Telephone'}
+        createdAt: {type: string, format: date-time, example: '2026-09-27T09:00:00.000Z'}
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error: {type: string, example: Запись не найдена}
+  requestBodies:
+    ContactInput:
+      required: true
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/ContactInput'}
+          example:
+            username: Анна Иванова
+            email: anna@example.com
+            telephone: {mobile: '+7 900 123-45-67', home: ''}
+  responses:
+    Contact:
+      description: Контакт
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/Contact'}
+    BadRequest:
+      description: Ошибка JSON или проверки полей
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/Error'}
+          example: {error: Укажите хотя бы один телефон}
+    NotFound:
+      description: Контакт не найден
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/Error'}
+          example: {error: Запись не найдена}
+    TooLarge:
+      description: Тело запроса превышает 64 КБ
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/Error'}
+          example: {error: Слишком большой запрос}
+    InternalError:
+      description: Внутренняя ошибка сервера
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/Error'}
+          example: {error: Внутренняя ошибка сервера}

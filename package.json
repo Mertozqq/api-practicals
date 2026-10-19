@@ -1,0 +1,37 @@
+{
+  "name": "api-practicals-5-8",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server/index.js",
+    "dev": "node --watch --env-file-if-exists=.env server/index.js",
+    "dev:ui": "vite --configLoader native --host 127.0.0.1",
+    "build": "vite build --configLoader native",
+    "heroku-postbuild": "npm run build",
+    "mock": "prism mock docs/openapi.yaml -h 127.0.0.1 -p 4010 --errors",
+    "grpc:server": "node --env-file-if-exists=.env server/grpc/standalone.js",
+    "grpc:demo": "node scripts/grpc-demo.js",
+    "test": "node --test --test-concurrency=1 tests/*.test.js"
+  },
+  "dependencies": {
+    "@grpc/grpc-js": "^1.14.0",
+    "@grpc/proto-loader": "^0.8.0",
+    "express": "^5.1.0",
+    "graphql": "^16.11.0",
+    "mongodb": "^6.20.0",
+    "redoc": "^2.5.0",
+    "swagger-ui-dist": "^5.33.3",
+    "vue": "^3.5.0",
+    "yaml": "^2.8.0"
+  },
+  "devDependencies": {
+    "@apidevtools/swagger-parser": "^12.0.0",
+    "@stoplight/prism-cli": "^5.14.0",
+    "@vitejs/plugin-vue": "^6.0.0",
+    "vite": "^7.1.0"
+  }
+}

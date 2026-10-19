@@ -1,0 +1,36 @@
+syntax = "proto3";
+package shopping;
+
+service ShoppingService {
+  rpc ListItems (ListRequest) returns (ItemList);
+  rpc GetItem (IdRequest) returns (Item);
+  rpc CreateItem (CreateRequest) returns (Item);
+  rpc UpdateItem (UpdateRequest) returns (Item);
+  rpc DeleteItem (IdRequest) returns (DeleteReply);
+}
+message ListRequest { string user_id = 1; }
+message IdRequest { string id = 1; }
+message Item {
+  string id = 1;
+  string text = 2;
+  int32 qty = 3;
+  bool completed = 4;
+  string user_id = 5;
+  string created_at = 6;
+}
+message ItemList { repeated Item items = 1; }
+message CreateRequest {
+  string text = 1;
+  int32 qty = 2;
+  bool completed = 3;
+  string user_id = 4;
+}
+// Optional fields preserve explicit false and distinguish it from an absent value.
+message UpdateRequest {
+  string id = 1;
+  optional string text = 2;
+  optional int32 qty = 3;
+  optional bool completed = 4;
+  optional string user_id = 5;
+}
+message DeleteReply { bool deleted = 1; }

@@ -1,0 +1,85 @@
+### VS Code REST Client / JetBrains HTTP Client. Copy returned IDs below.
+@base = http://localhost:3000
+@contactId = replace-with-contact-id
+@itemId = replace-with-item-id
+
+### 5. Create contact
+POST {{base}}/api/contacts
+Content-Type: application/json
+
+{"username":"Анна Иванова","email":"anna@example.com","telephone":{"mobile":"+7 900 123-45-67","home":""}}
+
+### List contacts
+GET {{base}}/api/contacts
+
+### Read one
+GET {{base}}/api/contacts/{{contactId}}
+
+### Full update
+PUT {{base}}/api/contacts/{{contactId}}
+Content-Type: application/json
+
+{"username":"Анна Петрова","email":"anna@example.com","telephone":{"mobile":"+7 900 222-33-44","home":""}}
+
+### Partial update
+PATCH {{base}}/api/contacts/{{contactId}}
+Content-Type: application/json
+
+{"email":"new@example.com"}
+
+### Delete
+DELETE {{base}}/api/contacts/{{contactId}}
+
+### 6. Prism: example from OpenAPI
+GET http://127.0.0.1:4010/api/contacts
+
+### 7. GraphQL create
+POST {{base}}/graphql
+Content-Type: application/json
+
+{"query":"mutation($input: CreateItemInput!) { createItem(input: $input) { id text qty completed userId } }","variables":{"input":{"text":"Молоко","qty":2,"userId":"student-1"}}}
+
+### GraphQL list
+POST {{base}}/graphql
+Content-Type: application/json
+
+{"query":"query($userId: ID!) { items(userId: $userId) { id text qty completed userId } }","variables":{"userId":"student-1"}}
+
+### GraphQL select only one field
+POST {{base}}/graphql
+Content-Type: application/json
+
+{"query":"query($id: ID!) { item(id: $id) { text } }","variables":{"id":"{{itemId}}"}}
+
+### GraphQL update
+POST {{base}}/graphql
+Content-Type: application/json
+
+{"query":"mutation($id: ID!, $input: UpdateItemInput!) { updateItem(id: $id, input: $input) { id qty completed } }","variables":{"id":"{{itemId}}","input":{"qty":3,"completed":true}}}
+
+### GraphQL delete
+POST {{base}}/graphql
+Content-Type: application/json
+
+{"query":"mutation($id: ID!) { deleteItem(id: $id) }","variables":{"id":"{{itemId}}"}}
+
+### 8. HTTP gateway -> real gRPC server
+POST {{base}}/rpc/items
+Content-Type: application/json
+
+{"text":"Хлеб","qty":1,"userId":"student-1"}
+
+### gRPC list through gateway
+GET {{base}}/rpc/items?userId=student-1
+
+### gRPC get through gateway
+GET {{base}}/rpc/items/{{itemId}}
+
+### gRPC update through gateway (explicit false is supported)
+PATCH {{base}}/rpc/items/{{itemId}}
+Content-Type: application/json
+
+{"completed":false,"qty":2}
+
+### gRPC delete through gateway
+DELETE {{base}}/rpc/items/{{itemId}}

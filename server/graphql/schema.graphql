@@ -1,0 +1,30 @@
+"""Товар в списке покупок пользователя."""
+type ShoppingItem {
+  id: ID!
+  text: String!
+  qty: Int!
+  completed: Boolean!
+  userId: ID!
+  createdAt: String!
+}
+input CreateItemInput {
+  text: String!
+  qty: Int!
+  completed: Boolean = false
+  userId: ID!
+}
+input UpdateItemInput {
+  text: String
+  qty: Int
+  completed: Boolean
+  userId: ID
+}
+type Query {
+  items(userId: ID!): [ShoppingItem!]!
+  item(id: ID!): ShoppingItem
+}
+type Mutation {
+  createItem(input: CreateItemInput!): ShoppingItem!
+  updateItem(id: ID!, input: UpdateItemInput!): ShoppingItem!
+  deleteItem(id: ID!): Boolean!
+}

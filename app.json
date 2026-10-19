@@ -1,0 +1,11 @@
+{
+  "name": "API Practicals 5-8",
+  "description": "Vue, REST, OpenAPI, GraphQL and gRPC educational application",
+  "env": {
+    "NODE_ENV": { "value": "production" },
+    "HOST": { "value": "0.0.0.0" },
+    "MONGODB_URI": { "description": "MongoDB connection URI", "required": true },
+    "MONGODB_DB": { "value": "api_practicals" }
+  },
+  "buildpacks": [{ "url": "heroku/nodejs" }]
+}
